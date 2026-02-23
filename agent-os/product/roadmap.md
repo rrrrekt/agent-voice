@@ -1,23 +1,26 @@
-# Product Roadmap — boiler-express-api
+# Product Roadmap — agent-voice
 
-1. [ ] **Rate Limiting** — Add global + per-route rate limiting via `express-rate-limit`; protect auth endpoints with a tight limit (5 req/15min), apply a looser global limit; return `429` with a `Retry-After` header. `S`
+1. [x] **Project scaffold** — `package.json`, `tsconfig.json`, `src/` folder structure, `.gitignore` update
 
-2. [ ] **Request ID Middleware** — Inject a `x-request-id` header (generate via `crypto.randomUUID()` if absent) into every request and propagate it through all Pino log entries so distributed traces are traceable end-to-end. `XS`
+2. [x] **Health endpoint** — `GET /health` → `{ status: "ok", service: "agent-voice" }`
 
-3. [ ] **Items Resource (CRUD)** — Full CRUD resource (`/api/v1/items`) owned by the authenticated user: Drizzle schema, service layer, router, Zod validation, and integration tests. Demonstrates the canonical pattern for adding new domain resources. `M`
+3. [x] **Core TTS endpoint** — `POST /v1/audio/speech` — accepts `{model, input, voice}`, calls Gemini TTS, converts PCM→MP3, returns `audio/mpeg` binary stream
 
-4. [ ] **Pagination Utility** — Implement a reusable `paginate(baseQuery, { page, limit })` helper that returns `{ data, meta: { page, limit, total, totalPages } }`; integrate with the items list endpoint. `S`
+4. [x] **Voice config** — `ALFRED_VOICE` env var (default: `Kore`), map OpenAI voice names to Gemini equivalents:
+   - alloy → Kore
+   - echo → Charon
+   - fable → Puck
+   - onyx → Orus
+   - nova → Aoede
+   - shimmer → Zephyr
 
-5. [ ] **Integration Test Suite** — Vitest integration tests for all auth endpoints against a real Postgres instance (no mocks); test register, login, refresh, logout, /me, and error cases (duplicate email, bad password, expired token). `M`
+5. [ ] **OpenClaw integration** — Patch `openclaw.json` to use `agent-voice` as the TTS provider at `http://localhost:3400`
 
-6. [ ] **GitHub Actions CI** — On every push and PR: run `typecheck`, `lint`, and integration tests in Docker Compose; gate merges on green; publish a test coverage summary as a PR comment. `S`
+6. [ ] **Docker build + systemd service** — `Dockerfile` with Node 22 slim + ffmpeg; systemd unit for auto-start on boot
 
-7. [ ] **Admin Role Middleware** — Add `requireRole('admin')` guards to protected routes; seed script for creating the first admin user; admin-only endpoint (`GET /api/v1/admin/users`) with pagination. `S`
-
-8. [ ] **Email Verification Flow** — On register, send a verification email with a signed token (nodemailer + SMTP env vars); `POST /auth/verify-email` endpoint that activates the account; unverified users blocked from protected routes. `L`
+7. [ ] **Voice audition script** — CLI tool (`src/scripts/audition.ts`) to test all 30 Gemini voices and save MP3 samples
 
 > Notes
-> - Items 1–2 are infrastructure; complete before domain features
-> - Item 3 (Items CRUD) is the reference implementation pattern — all future resources should mirror it
-> - Item 5 (tests) should be written alongside Item 3, not after
-> - Order respects technical dependencies: rate limiting before exposure; request IDs before observability matters
+> - Items 1–4 are the MVP core; complete before integration/deployment
+> - Item 5 (OpenClaw integration) requires agent-voice to be running and tested first
+> - Item 7 (audition script) is a developer tool, not required for production
