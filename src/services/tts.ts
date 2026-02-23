@@ -32,7 +32,7 @@ export async function generateSpeechPcm(inputText: string, voice?: string): Prom
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-preview-tts',
-    contents: [{ parts: [{ text: inputText }] }],
+    contents: [{ parts: [{ text: `Generate audio for the following text. Do not output anything else:\n\n${inputText}` }] }],
     config: {
       responseModalities: ['AUDIO'],
       speechConfig: {

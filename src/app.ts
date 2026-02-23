@@ -5,6 +5,7 @@ import { createRequire } from 'module';
 import { logger } from './index.js';
 import healthRouter from './routes/health.js';
 import speechRouter from './routes/speech.js';
+import { getMetrics } from './services/metrics.js';
 
 const require = createRequire(import.meta.url);
 // pino-http CJS module — use require to avoid ESM interop issues with its type declarations
@@ -21,6 +22,11 @@ export function createApp() {
 
   app.use(healthRouter);
   app.use(speechRouter);
+
+  // Simple metrics endpoint
+  app.get('/metrics', (req, res) => {
+    res.json(getMetrics());
+  });
 
   return app;
 }
